@@ -22,7 +22,7 @@ function Main() {
   const completed = tasks.filter((task) => task.completed);
   const active = tasks.filter((task) => !task.completed);
   const [taskState, setTaskState] = useState("all");
-  const [mode, setMode] = useLocalStorage("theme","moon");
+  const [mode, setMode] = useLocalStorage("theme", "moon");
   const isMobile = useMediaQuery({ query: "(max-width: 500px)" });
 
   function addNewTask(newTask) {
@@ -74,11 +74,13 @@ function Main() {
 
     setTasks((tasks) => arrayMove(tasks, currentPosition, overPosition));
   }
+
+  // Add a delay for touch events to avoid accidental drags
   const sensors = useSensors(
     useSensor(PointerSensor),
-    useSensor(TouchSensor),
-    useSensor(KeyboardSensor, { coordinateGetter : sortableKeyboardCoordinates}),
-  )
+    useSensor(TouchSensor, { activationConstraint: { delay: 150, tolerance: 5 } }), // Add delay and tolerance for touch
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
 
   const currentTasks =
     taskState === "all" ? tasks : taskState === "active" ? active : completed;
