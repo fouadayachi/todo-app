@@ -6,7 +6,15 @@ import Moon from "./moon";
 import Sun from "./Sun";
 import Details from "./details";
 import { useMediaQuery } from "react-responsive";
-import { closestCorners, DndContext, KeyboardSensor, PointerSensor, TouchSensor, useSensor, useSensors } from "@dnd-kit/core";
+import {
+  closestCorners,
+  DndContext,
+  KeyboardSensor,
+  PointerSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
 import {
   arrayMove,
   SortableContext,
@@ -75,10 +83,17 @@ function Main() {
     setTasks((tasks) => arrayMove(tasks, currentPosition, overPosition));
   }
 
-  // Add a delay for touch events to avoid accidental drags
+  // Adjust the TouchSensor to prevent long press interference
   const sensors = useSensors(
     useSensor(PointerSensor),
-    useSensor(TouchSensor, { activationConstraint: { delay: 150, tolerance: 5 } }), // Add delay and tolerance for touch
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 100, // Reduce delay to minimize drag initiation lag
+        tolerance: 10, // Increase tolerance to prevent accidental short drags
+        // Preventing passive listeners that might block touch responsiveness
+        passive: false,
+      },
+    }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
 
@@ -90,11 +105,7 @@ function Main() {
       <div className="todo">
         <div className="heading">
           <h1>T O D O</h1>
-          {mode === "sun" ? (
-            <Moon changeMode={changeMode} />
-          ) : (
-            <Sun changeMode={changeMode} />
-          )}
+          {mode === "sun" ? <Moon changeMode={changeMode} /> : <Sun changeMode={changeMode} />}
         </div>
         <AddTask handleAddTask={addNewTask} />
         <div className="items">
@@ -119,18 +130,11 @@ function Main() {
           </DndContext>
           <div className="tasks-details">
             <span>{active.length} items left</span>
-            {!isMobile && (
-              <Details
-                taskState={taskState}
-                changeTaskState={changeTaskState}
-              />
-            )}
+            {!isMobile && <Details taskState={taskState} changeTaskState={changeTaskState} />}
             <button onClick={removeCompleted}>Clear completed</button>
           </div>
         </div>
-        {isMobile && (
-          <Details taskState={taskState} changeTaskState={changeTaskState} />
-        )}
+        {isMobile && <Details taskState={taskState} changeTaskState={changeTaskState} />}
       </div>
     </div>
   );
