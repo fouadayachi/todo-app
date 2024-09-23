@@ -10,6 +10,10 @@ export default function TaskItem({ task, handleClick, handleRemove }) {
     transform: CSS.Transform.toString(transform),
   };
 
+  const preventDragStart = (e) => {
+    e.stopPropagation(); // Prevent drag initiation
+  };
+
   return (
     <div
       className={`${task.completed ? 'task-item completed' : 'task-item'}`}
@@ -18,10 +22,11 @@ export default function TaskItem({ task, handleClick, handleRemove }) {
       {...listeners}
       style={style}
     >
-      {/* Prevent drag when interacting with the checkbox */}
+      {/* Prevent drag when interacting with the checkbox on both desktop and mobile */}
       <div
-        onPointerDown={(e) => e.stopPropagation()} // Prevent drag initiation
+        onPointerDown={preventDragStart} // Prevent drag initiation on pointer devices
         onClick={(e) => e.stopPropagation()} // Prevent checkbox click from propagating
+        onTouchStart={preventDragStart} // Prevent drag initiation on touch devices
       >
         <Checkbox onHandleClick={() => handleClick(task.idTask)} task={task} />
       </div>
@@ -29,10 +34,11 @@ export default function TaskItem({ task, handleClick, handleRemove }) {
       <button
         className="close"
         onClick={(e) => {
-          e.stopPropagation(); // Stop the drag event
+          e.stopPropagation(); // Stop the event propagation for desktop
           handleRemove(task.idTask); // Call the remove function
         }}
-        onPointerDown={(e) => e.stopPropagation()} // Prevent drag initiation on button press
+        onPointerDown={preventDragStart} // Prevent drag initiation on button press for desktop
+        onTouchStart={preventDragStart} // Prevent drag initiation on button press for touch devices
       >
         X
       </button>
