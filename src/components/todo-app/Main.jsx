@@ -6,12 +6,14 @@ import Moon from "./moon";
 import Sun from "./Sun";
 import Details from "./details";
 import { useMediaQuery } from "react-responsive";
-import { closestCorners, DndContext } from "@dnd-kit/core";
+import { closestCorners, DndContext, KeyboardSensor, PointerSensor, TouchSensor, useSensor, useSensors } from "@dnd-kit/core";
 import {
   arrayMove,
   SortableContext,
+  sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
+import useLocalStorage from "./useLocalStorage";
 
 let id = 1;
 
@@ -20,7 +22,7 @@ function Main() {
   const completed = tasks.filter((task) => task.completed);
   const active = tasks.filter((task) => !task.completed);
   const [taskState, setTaskState] = useState("all");
-  const [mode, setMode] = useState("moon");
+  const [mode, setMode] = useLocalStorage("theme","moon");
   const isMobile = useMediaQuery({ query: "(max-width: 500px)" });
 
   function addNewTask(newTask) {
@@ -72,6 +74,11 @@ function Main() {
 
     setTasks((tasks) => arrayMove(tasks, currentPosition, overPosition));
   }
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(TouchSensor),
+    useSensor(KeyboardSensor, { coordinateGetter : sortableKeyboardCoordinates}),
+  )
 
   const currentTasks =
     taskState === "all" ? tasks : taskState === "active" ? active : completed;
@@ -92,6 +99,7 @@ function Main() {
           <DndContext
             collisionDetection={closestCorners}
             onDragEnd={handleDrag}
+            sensors={sensors}
           >
             <SortableContext
               items={currentTasks.map((task) => task.idTask)} // Pass task IDs
