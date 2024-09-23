@@ -6,9 +6,10 @@ import Country from "./Country";
 import FilterSection from "./Filter-inputs";
 import { Route, Routes } from "react-router-dom";
 import CountryDetails from "./CountryDetails";
+import useLocalStorage from "./useLocalStorage";
 
 export default function Countries() {
-  const [mode, setMode] = useState("Dark");
+  const [mode, setMode] = useLocalStorage("mode","Dark");
   const [continent, setContinent] = useState("all");
   const [countryFilter, setCountryFilter] = useState("");
 
